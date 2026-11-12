@@ -24,7 +24,7 @@ export default function Recuperar() {
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email,
       {
-        redirectTo: "http://conecta-nbsu-90tirdrr7-y1184.vercel.app/nueva-password",
+        redirectTo:`${window.location.origin}/nueva-password`, 
       }
     );
 
