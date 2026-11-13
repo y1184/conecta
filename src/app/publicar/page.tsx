@@ -160,7 +160,7 @@ export default function Publicar() {
           Contá qué necesitás y recibí propuestas de trabajadores.
         </p>
 
-        <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div className="bg-white p-4 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4 md:space-y-6 w-full">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
               ¿Qué necesitás? <span className="text-red-500">*</span>
