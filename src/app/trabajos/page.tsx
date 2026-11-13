@@ -19,7 +19,7 @@ type Trabajo = {
   created_at: string;
   fotos_url: string[] | null;
   video_url: string | null;
-  pais: string | null; // 👈 NUEVO
+  pais: string | null;
 };
 
 type Empleador = {
@@ -41,7 +41,7 @@ function TrabajosContenido() {
   
   const buscar = searchParams.get("buscar") || "";
   const ubicacionParam = searchParams.get("ubicacion") || "";
-  const paisParam = searchParams.get("pais") || ""; // 👈 NUEVO
+  const paisParam = searchParams.get("pais") || "";
 
   useEffect(() => {
     const cargar = async () => {
@@ -64,7 +64,6 @@ function TrabajosContenido() {
           query = query.ilike("ubicacion", `%${ubicacionParam}%`);
         }
         
-        // 👈 NUEVO: Filtro por país
         if (paisParam) {
           query = query.eq("pais", paisParam);
         }
@@ -101,9 +100,8 @@ function TrabajosContenido() {
       }
     };
     cargar();
-  }, [buscar, ubicacionParam, paisParam]); // 👈 Agregamos paisParam a las dependencias
+  }, [buscar, ubicacionParam, paisParam]);
 
-  // 👈 NUEVO: Función para cambiar el filtro de país
   const handleCambiarPais = (nuevoPais: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (nuevoPais) {
@@ -189,7 +187,6 @@ function TrabajosContenido() {
           Estas son las demandas publicadas por empleadores.
         </p>
 
-        {/* 👈 NUEVO: BARRA DE FILTROS DE PAÍS */}
         <div className="flex gap-2 mb-8 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm w-max">
           <button 
             onClick={() => handleCambiarPais("")}
@@ -224,7 +221,8 @@ function TrabajosContenido() {
         )}
 
         {trabajos.length > 0 ? (
-          <div className="grid md:grid-cols-2 gap-6">
+          // 👈 ACÁ ESTÁ EL ARREGLO: Agregamos grid-cols-1 y w-full
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             {trabajos.map((trabajo) => {
               const empleador = empleadores.get(trabajo.user_id);
               const nombreEmpleador = empleador?.nombre || "Empleador";
@@ -241,7 +239,6 @@ function TrabajosContenido() {
                       <span className={`inline-block border text-xs font-medium px-3 py-1 rounded-full ${urgenciaInfo.clase}`}>
                         {urgenciaInfo.emoji} {urgenciaInfo.texto}
                       </span>
-                      {/* 👈 NUEVO: Etiqueta de País en la tarjeta */}
                       <span className="inline-block bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium px-3 py-1 rounded-full">
                         {trabajo.pais === "Argentina" ? "🇦🇷 Argentina" : "🇺🇾 Uruguay"}
                       </span>
@@ -255,7 +252,6 @@ function TrabajosContenido() {
                     <h2 className="text-xl font-bold mb-2 text-slate-800">{trabajo.titulo}</h2>
                     <p className="text-slate-700 text-sm mb-4 line-clamp-3">{trabajo.descripcion}</p>
 
-                    {/* FOTOS */}
                     {trabajo.fotos_url && trabajo.fotos_url.length > 0 && (
                       <div className="grid grid-cols-3 gap-2 mb-4">
                         {trabajo.fotos_url.map((url, i) => (
@@ -266,7 +262,6 @@ function TrabajosContenido() {
                       </div>
                     )}
 
-                    {/* VIDEO */}
                     {trabajo.video_url && (
                       <div className="mb-4">
                         <video src={trabajo.video_url} controls className="w-full rounded-lg" />
@@ -280,7 +275,6 @@ function TrabajosContenido() {
                     </div>
                   </div>
 
-                  {/* BOTONES */}
                   <div>
                     {esMia ? (
                       <div className="space-y-2 mt-4">

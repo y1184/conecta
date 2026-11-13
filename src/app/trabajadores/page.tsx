@@ -39,11 +39,9 @@ export default function Trabajadores() {
     const cargarDatos = async () => {
       setLoading(true);
 
-      // 1. Obtener usuario actual
       const { data: userData } = await supabase.auth.getUser();
       setUsuario(userData.user);
 
-      // 2. Cargar favoritos del usuario
       if (userData.user) {
         const { data: favsData } = await supabase
           .from("favoritos")
@@ -55,7 +53,6 @@ export default function Trabajadores() {
         }
       }
 
-      // 3. Cargar trabajadores con filtros de búsqueda
       let query = supabase.from("trabajadores").select("*");
 
       if (busquedaOficio.trim()) {
@@ -68,7 +65,6 @@ export default function Trabajadores() {
       const { data: trabajadoresData } = await query;
       setTrabajadores(trabajadoresData || []);
 
-      // 4. Cargar calificaciones para calcular promedios
       const { data: calificacionesData } = await supabase
         .from("calificaciones")
         .select("evaluado_id, estrellas");
@@ -87,7 +83,6 @@ export default function Trabajadores() {
       setLoading(false);
     };
 
-    // Debounce para no saturar la base de datos a cada letra
     const timer = setTimeout(() => {
       cargarDatos();
     }, 300); 
@@ -95,7 +90,6 @@ export default function Trabajadores() {
     return () => clearTimeout(timer);
   }, [busquedaOficio, busquedaCiudad]);
 
-  // Función para guardar/quitar de favoritos
   const toggleFavorito = async (trabajadorId: string) => {
     if (!usuario) {
       alert("Tenés que iniciar sesión para guardar en favoritos.");
@@ -105,14 +99,12 @@ export default function Trabajadores() {
     const yaEsFavorito = favoritos.includes(trabajadorId);
 
     if (yaEsFavorito) {
-      // Quitar de favoritos (actualización visual rápida)
       setFavoritos(favoritos.filter(id => id !== trabajadorId));
       await supabase
         .from("favoritos")
         .delete()
         .match({ user_id: usuario.id, trabajador_id: trabajadorId });
     } else {
-      // Agregar a favoritos (actualización visual rápida)
       setFavoritos([...favoritos, trabajadorId]);
       await supabase
         .from("favoritos")
@@ -160,7 +152,6 @@ export default function Trabajadores() {
           Estas son las personas que ofrecen sus servicios en Conecta.
         </p>
 
-        {/* BARRA DE FILTROS */}
         <div className="bg-white rounded-full shadow-lg shadow-slate-200/50 p-2 flex flex-col md:flex-row items-center gap-2 border border-slate-100 mb-10 max-w-3xl">
           <div className="flex-1 w-full flex items-center px-4">
             <span className="text-slate-400 mr-2">🔍</span>
@@ -200,7 +191,8 @@ export default function Trabajadores() {
             </button>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-6">
+          // 👈 ACÁ ESTÁ EL ARREGLO
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             {trabajadores.map((trabajador) => {
               const rating = getPromedio(trabajador.user_id);
               const esFavorito = favoritos.includes(trabajador.user_id);
@@ -208,7 +200,6 @@ export default function Trabajadores() {
               return (
                 <div key={trabajador.id} className="bg-white border border-slate-200 rounded-3xl p-6 hover:shadow-xl hover:shadow-sky-100 transition-all duration-300 relative">
                   
-                  {/* BOTÓN DE FAVORITOS */}
                   <button 
                     onClick={() => toggleFavorito(trabajador.user_id)}
                     className="absolute top-6 right-6 text-2xl hover:scale-110 transition-transform focus:outline-none"
@@ -250,7 +241,6 @@ export default function Trabajadores() {
                     )}
                   </div>
 
-                  {/* DESCRIPCIÓN CON COMILLAS CORREGIDAS */}
                   {trabajador.descripcion && (
                     <p className="text-sm text-slate-700 italic mb-4 line-clamp-2">
                       &quot;{trabajador.descripcion}&quot;
