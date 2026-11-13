@@ -154,7 +154,7 @@ export default function Publicar() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
+      <main className="max-w-3xl mx-auto px-4 py-8 w-full">
         <h1 className="text-4xl font-bold mb-2 text-slate-800">Publicar una demanda</h1>
         <p className="text-slate-600 mb-8">
           Contá qué necesitás y recibí propuestas de trabajadores.
