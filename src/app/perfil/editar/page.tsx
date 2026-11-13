@@ -289,8 +289,8 @@ export default function EditarPerfil() {
                   onChange={(e) => setPais(e.target.value)} 
                   className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500 transition-colors bg-white"
                 >
-                  <option value="Uruguay">🇺🇾 Uruguay</option>
-                  <option value="Argentina">🇦🇷 Argentina</option>
+                  <option value="Uruguay">&#127482;&#127486; Uruguay</option>
+                  <option value="Argentina">&#127462;&#127479; Argentina</option>
                 </select>
               </div>
 
