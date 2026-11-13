@@ -27,6 +27,7 @@ export default function Publicar() {
   const [presupuesto, setPresupuesto] = useState("");
   const [ubicacion, setUbicacion] = useState("");
   const [urgencia, setUrgencia] = useState("Sin apuro");
+  const [pais, setPais] = useState("Uruguay"); // 👈 NUEVO
   
   const [fotos, setFotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -42,7 +43,7 @@ export default function Publicar() {
     const combinadas = [...fotos, ...archivos].slice(0, MAX_FOTOS);
     setFotos(combinadas);
     setPreviews(combinadas.map((f) => URL.createObjectURL(f)));
-    e.target.value = ""; // Limpiamos el input
+    e.target.value = ""; 
   };
 
   const quitarFoto = (index: number) => {
@@ -126,6 +127,7 @@ export default function Publicar() {
       presupuesto: presupuesto || null,
       ubicacion: ubicacion || "Sin especificar",
       urgencia: urgencia,
+      pais: pais, // 👈 NUEVO: Guardamos el país
       fotos_url: urlsFotos,
       video_url: urlVideo,
     });
@@ -143,8 +145,8 @@ export default function Publicar() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-200">
+    <div className="min-h-screen">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <Link href="/" className="text-2xl font-bold text-sky-600">
             Conecta
@@ -153,14 +155,14 @@ export default function Publicar() {
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold mb-2">Publicar una demanda</h1>
-        <p className="text-gray-600 mb-8">
+        <h1 className="text-4xl font-bold mb-2 text-slate-800">Publicar una demanda</h1>
+        <p className="text-slate-600 mb-8">
           Contá qué necesitás y recibí propuestas de trabajadores.
         </p>
 
-        <div className="space-y-6">
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
               ¿Qué necesitás? <span className="text-red-500">*</span>
             </label>
             <input
@@ -168,16 +170,16 @@ export default function Publicar() {
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Ej: Electricista para instalación"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500"
+              className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Categoría</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Categoría</label>
             <select
               value={categoria}
               onChange={(e) => setCategoria(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500"
+              className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500 transition-colors bg-white"
             >
               {CATEGORIAS.map((cat) => (
                 <option key={cat} value={cat}>
@@ -189,7 +191,7 @@ export default function Publicar() {
 
           {categoria === "Otro" && (
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Escribí la categoría
               </label>
               <input
@@ -197,17 +199,17 @@ export default function Publicar() {
                 value={categoriaOtra}
                 onChange={(e) => setCategoriaOtra(e.target.value)}
                 placeholder="Ej: Reparación de bicicletas"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500"
+                className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500 transition-colors"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium mb-2">Urgencia</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Urgencia</label>
             <select
               value={urgencia}
               onChange={(e) => setUrgencia(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500"
+              className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500 transition-colors bg-white"
             >
               <option value="Urgente">🔴 Urgente (lo antes posible)</option>
               <option value="Esta semana">🟡 Esta semana</option>
@@ -217,47 +219,61 @@ export default function Publicar() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Descripción</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Descripción</label>
             <textarea
-              rows={5}
+              rows={4}
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               placeholder="Contá más detalles de lo que necesitás..."
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500"
+              className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500 transition-colors"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Presupuesto (opcional)</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Presupuesto (opcional)</label>
               <input
                 type="text"
                 value={presupuesto}
                 onChange={(e) => setPresupuesto(e.target.value)}
                 placeholder="Ej: $2000"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500"
+                className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500 transition-colors"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Ubicación</label>
-              <input
-                type="text"
-                value={ubicacion}
-                onChange={(e) => setUbicacion(e.target.value)}
-                placeholder="Ej: Montevideo"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500"
-              />
+            
+            {/* 👈 NUEVO: Fila con País y Ubicación */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">País</label>
+                <select
+                  value={pais}
+                  onChange={(e) => setPais(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500 transition-colors bg-white"
+                >
+                  <option value="Uruguay">Uruguay</option>
+                  <option value="Argentina">Argentina</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Ciudad</label>
+                <input
+                  type="text"
+                  value={ubicacion}
+                  onChange={(e) => setUbicacion(e.target.value)}
+                  placeholder="Ej: Montevideo"
+                  className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-sky-500 transition-colors"
+                />
+              </div>
             </div>
           </div>
 
-          {/* 👈 NUEVO: SECCIÓN DE FOTOS MEJORADA */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
+          {/* SECCIÓN DE FOTOS */}
+          <div className="pt-4 border-t border-slate-100">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
               Fotos (opcional, hasta {MAX_FOTOS})
             </label>
             
-            {/* Botón lindo que disfraza al input feo */}
-            <label className={`cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 ${fotos.length >= MAX_FOTOS ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <label className={`cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-slate-300 rounded-full shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors ${fotos.length >= MAX_FOTOS ? 'opacity-50 cursor-not-allowed' : ''}`}>
               <span>📸 Elegir fotos</span>
               <input
                 type="file"
@@ -265,15 +281,14 @@ export default function Publicar() {
                 multiple
                 onChange={manejarSeleccionFotos}
                 disabled={fotos.length >= MAX_FOTOS}
-                className="hidden" // 👈 Acá escondemos el input feo
+                className="hidden" 
               />
             </label>
             
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-slate-500 mt-2">
               {fotos.length}/{MAX_FOTOS} fotos elegidas
             </p>
 
-            {/* Vistas previas con botón de eliminar */}
             {previews.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-3">
                 {previews.map((src, i) => (
@@ -281,7 +296,7 @@ export default function Publicar() {
                     <img
                       src={src}
                       alt={`Foto ${i + 1}`}
-                      className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                      className="w-full h-24 object-cover rounded-lg border border-slate-200"
                     />
                     <button
                       type="button"
@@ -296,25 +311,25 @@ export default function Publicar() {
             )}
           </div>
 
-          {/* 👈 NUEVO: SECCIÓN DE VIDEO MEJORADA */}
+          {/* SECCIÓN DE VIDEO */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
               Video (opcional, máx 20 MB)
             </label>
             
-            <label className="cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            <label className="cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-slate-300 rounded-full shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors">
               <span>🎥 Elegir video</span>
               <input
                 type="file"
                 accept="video/mp4,video/webm,video/quicktime"
                 onChange={(e) => setVideo(e.target.files?.[0] || null)}
-                className="hidden" // 👈 Acá escondemos el input feo
+                className="hidden"
               />
             </label>
 
             {video && (
-              <div className="mt-3 flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <p className="text-sm text-gray-700 truncate">{video.name}</p>
+              <div className="mt-3 flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <p className="text-sm text-slate-700 truncate">{video.name}</p>
                 <button
                   type="button"
                   onClick={() => setVideo(null)}
@@ -326,7 +341,6 @@ export default function Publicar() {
             )}
           </div>
 
-          {/* MENSAJES DE ERROR Y ÉXITO */}
           {error && <p className="text-red-600 text-sm font-medium">{error}</p>}
 
           {exito && (
@@ -338,18 +352,18 @@ export default function Publicar() {
           <button
             onClick={handlePublicar}
             disabled={loading}
-            className="w-full bg-sky-600 text-white font-medium py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="w-full bg-sky-600 text-white font-medium py-3 rounded-xl hover:bg-sky-700 disabled:opacity-50 transition-colors shadow-sm text-lg"
           >
             {loading ? "Publicando..." : "Publicar demanda"}
           </button>
-
-          <Link
-            href="/"
-            className="inline-block mt-8 text-sky-600 hover:underline"
-          >
-            ← Volver al inicio
-          </Link>
         </div>
+
+        <Link
+          href="/"
+          className="inline-block mt-8 text-sky-600 hover:underline font-medium"
+        >
+          ← Volver al inicio
+        </Link>
       </main>
     </div>
   );
