@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 
@@ -19,6 +19,7 @@ type Trabajo = {
   created_at: string;
   fotos_url: string[] | null;
   video_url: string | null;
+  pais: string | null; // 👈 NUEVO
 };
 
 type Empleador = {
@@ -36,8 +37,11 @@ function TrabajosContenido() {
   const [cerrando, setCerrando] = useState<number | null>(null);
 
   const searchParams = useSearchParams();
+  const router = useRouter();
+  
   const buscar = searchParams.get("buscar") || "";
   const ubicacionParam = searchParams.get("ubicacion") || "";
+  const paisParam = searchParams.get("pais") || ""; // 👈 NUEVO
 
   useEffect(() => {
     const cargar = async () => {
@@ -58,6 +62,11 @@ function TrabajosContenido() {
 
         if (ubicacionParam) {
           query = query.ilike("ubicacion", `%${ubicacionParam}%`);
+        }
+        
+        // 👈 NUEVO: Filtro por país
+        if (paisParam) {
+          query = query.eq("pais", paisParam);
         }
 
         const { data: trabajosData, error } = await query;
@@ -92,7 +101,18 @@ function TrabajosContenido() {
       }
     };
     cargar();
-  }, [buscar, ubicacionParam]);
+  }, [buscar, ubicacionParam, paisParam]); // 👈 Agregamos paisParam a las dependencias
+
+  // 👈 NUEVO: Función para cambiar el filtro de país
+  const handleCambiarPais = (nuevoPais: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nuevoPais) {
+      params.set("pais", nuevoPais);
+    } else {
+      params.delete("pais");
+    }
+    router.push(`/trabajos?${params.toString()}`);
+  };
 
   const handleCerrar = async (trabajoId: number) => {
     if (!confirm("¿Marcar esta demanda como resuelta? Ya no aparecerá en la lista.")) {
@@ -147,15 +167,15 @@ function TrabajosContenido() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-500">Cargando...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-slate-500">Cargando...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-200">
+    <div className="min-h-screen">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <Link href="/" className="text-2xl font-bold text-sky-600">
             Conecta
@@ -164,13 +184,35 @@ function TrabajosContenido() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold mb-2">Trabajos disponibles</h1>
-        <p className="text-gray-600 mb-8">
+        <h1 className="text-4xl font-bold mb-2 text-slate-800">Trabajos disponibles</h1>
+        <p className="text-slate-600 mb-8">
           Estas son las demandas publicadas por empleadores.
         </p>
 
+        {/* 👈 NUEVO: BARRA DE FILTROS DE PAÍS */}
+        <div className="flex gap-2 mb-8 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm w-max">
+          <button 
+            onClick={() => handleCambiarPais("")}
+            className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${!paisParam ? 'bg-sky-100 text-sky-700' : 'text-slate-600 hover:bg-slate-100'}`}
+          >
+            Todos
+          </button>
+          <button 
+            onClick={() => handleCambiarPais("Uruguay")}
+            className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${paisParam === 'Uruguay' ? 'bg-sky-100 text-sky-700' : 'text-slate-600 hover:bg-slate-100'}`}
+          >
+            🇺🇾 Uruguay
+          </button>
+          <button 
+            onClick={() => handleCambiarPais("Argentina")}
+            className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${paisParam === 'Argentina' ? 'bg-sky-100 text-sky-700' : 'text-slate-600 hover:bg-slate-100'}`}
+          >
+            🇦🇷 Argentina
+          </button>
+        </div>
+
         {(buscar || ubicacionParam) && (
-          <div className="mb-6 p-4 bg-blue-50 text-blue-800 rounded-xl flex justify-between items-center">
+          <div className="mb-6 p-4 bg-sky-50 text-sky-800 rounded-xl flex justify-between items-center border border-sky-100">
             <p>
               Mostrando resultados para: <strong>{buscar || "Todo"}</strong> 
               {ubicacionParam && ` en ${ubicacionParam}`}
@@ -190,14 +232,18 @@ function TrabajosContenido() {
               const esMia = usuario?.id === trabajo.user_id;
 
               return (
-                <div key={trabajo.id} className="border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition flex flex-col justify-between">
+                <div key={trabajo.id} className="bg-white border border-slate-200 rounded-3xl p-6 hover:shadow-xl hover:shadow-sky-100 transition-all duration-300 flex flex-col justify-between">
                   <div>
                     <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="inline-block bg-blue-100 text-sky-700 text-xs font-medium px-3 py-1 rounded-full">
+                      <span className="inline-block bg-sky-100 text-sky-700 text-xs font-medium px-3 py-1 rounded-full">
                         {trabajo.categoria}
                       </span>
                       <span className={`inline-block border text-xs font-medium px-3 py-1 rounded-full ${urgenciaInfo.clase}`}>
                         {urgenciaInfo.emoji} {urgenciaInfo.texto}
+                      </span>
+                      {/* 👈 NUEVO: Etiqueta de País en la tarjeta */}
+                      <span className="inline-block bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium px-3 py-1 rounded-full">
+                        {trabajo.pais === "Argentina" ? "🇦🇷 Argentina" : "🇺🇾 Uruguay"}
                       </span>
                       {esMia && (
                         <span className="inline-block bg-purple-100 text-purple-700 border border-purple-200 text-xs font-medium px-3 py-1 rounded-full">
@@ -206,15 +252,15 @@ function TrabajosContenido() {
                       )}
                     </div>
 
-                    <h2 className="text-xl font-bold mb-2">{trabajo.titulo}</h2>
-                    <p className="text-gray-700 text-sm mb-4">{trabajo.descripcion}</p>
+                    <h2 className="text-xl font-bold mb-2 text-slate-800">{trabajo.titulo}</h2>
+                    <p className="text-slate-700 text-sm mb-4 line-clamp-3">{trabajo.descripcion}</p>
 
                     {/* FOTOS */}
                     {trabajo.fotos_url && trabajo.fotos_url.length > 0 && (
                       <div className="grid grid-cols-3 gap-2 mb-4">
                         {trabajo.fotos_url.map((url, i) => (
                           <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                            <img src={url} alt={`Foto ${i + 1}`} className="w-full h-20 object-cover rounded-lg hover:opacity-80" />
+                            <img src={url} alt={`Foto ${i + 1}`} className="w-full h-20 object-cover rounded-lg hover:opacity-80 transition-opacity" />
                           </a>
                         ))}
                       </div>
@@ -227,36 +273,36 @@ function TrabajosContenido() {
                       </div>
                     )}
 
-                    <div className="space-y-1 text-sm text-gray-600 mb-4">
+                    <div className="space-y-1 text-sm text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl">
                       <p>📍 {trabajo.ubicacion}</p>
                       {trabajo.presupuesto && <p>💰 Presupuesto: {trabajo.presupuesto}</p>}
-                      <p className="text-gray-500">Publicado por: <strong>{nombreEmpleador}</strong></p>
+                      <p className="text-slate-500">Publicado por: <strong>{nombreEmpleador}</strong></p>
                     </div>
                   </div>
 
                   {/* BOTONES */}
                   <div>
                     {esMia ? (
-                      <div className="space-y-2 mt-4"> {/* 👈 NUEVO: Envoltorio para los botones */}
+                      <div className="space-y-2 mt-4">
                         <Link
                           href={`/trabajos/editar/${trabajo.id}`}
-                          className="block w-full text-center bg-gray-100 text-gray-800 font-medium py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                          className="block w-full text-center bg-slate-100 text-slate-800 font-medium py-2.5 rounded-xl hover:bg-slate-200 transition-colors"
                         >
                           ✏️ Editar publicación
                         </Link>
                         <button
                           onClick={() => handleCerrar(trabajo.id)}
                           disabled={cerrando === trabajo.id}
-                          className="block w-full text-center bg-green-600 text-white font-medium py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                          className="block w-full text-center bg-green-500 text-white font-medium py-2.5 rounded-xl hover:bg-green-600 disabled:opacity-50 transition-colors"
                         >
                           {cerrando === trabajo.id ? "Cerrando..." : "✅ Marcar como resuelta"}
                         </button>
                       </div>
                     ) : (
-                      <div className="mt-4">
+                      <div className="mt-4 space-y-2">
                         <Link
                           href={`/chat/${trabajo.user_id}`}
-                          className="block w-full text-center bg-gray-800 text-white font-medium py-2 rounded-lg hover:bg-gray-900 mb-2"
+                          className="block w-full text-center bg-slate-800 text-white font-medium py-2.5 rounded-xl hover:bg-slate-900 transition-colors shadow-sm"
                         >
                           💬 Contactar a {nombreEmpleador}
                         </Link>
@@ -266,7 +312,7 @@ function TrabajosContenido() {
                             href={`https://wa.me/${empleador.whatsapp}?text=Hola ${nombreEmpleador}, te contacto desde Conecta por tu demanda de ${trabajo.titulo}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="block w-full text-center bg-green-600 text-white font-medium py-2 rounded-lg hover:bg-green-700 mb-2"
+                            className="block w-full text-center bg-green-500 text-white font-medium py-2.5 rounded-xl hover:bg-green-600 transition-colors shadow-sm"
                           >
                             📱 WhatsApp
                           </a>
@@ -277,7 +323,7 @@ function TrabajosContenido() {
                             href={getEmailLink(empleador.email, nombreEmpleador, trabajo.titulo)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="block w-full text-center bg-sky-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700"
+                            className="block w-full text-center bg-sky-100 text-sky-700 font-medium py-2.5 rounded-xl hover:bg-sky-200 transition-colors"
                           >
                             ✉️ Email
                           </a>
@@ -290,17 +336,17 @@ function TrabajosContenido() {
             })}
           </div>
         ) : (
-          <div className="border border-dashed border-gray-300 rounded-2xl p-12 text-center">
-            {buscar || ubicacionParam ? (
+          <div className="bg-white border border-dashed border-slate-300 rounded-3xl p-12 text-center">
+            {buscar || ubicacionParam || paisParam ? (
               <>
-                <p className="text-gray-500 mb-4">No encontramos demandas que coincidan con tu búsqueda. 😢</p>
+                <p className="text-slate-500 mb-4">No encontramos demandas que coincidan con tu búsqueda. 😢</p>
                 <Link href="/trabajos" className="inline-block text-sky-600 hover:underline font-medium">
                   Ver todos los trabajos
                 </Link>
               </>
             ) : (
               <>
-                <p className="text-gray-500">Todavía no hay demandas publicadas.</p>
+                <p className="text-slate-500">Todavía no hay demandas publicadas.</p>
                 <Link href="/publicar" className="inline-block mt-4 text-sky-600 hover:underline">
                   Publicar la primera demanda
                 </Link>
@@ -309,7 +355,7 @@ function TrabajosContenido() {
           </div>
         )}
 
-        <Link href="/" className="inline-block mt-8 text-sky-600 hover:underline">
+        <Link href="/" className="inline-block mt-12 text-sky-600 hover:underline font-medium">
           ← Volver al inicio
         </Link>
       </main>
@@ -320,8 +366,8 @@ function TrabajosContenido() {
 export default function Trabajos() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-500">Cargando buscador...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-slate-500">Cargando buscador...</p>
       </div>
     }>
       <TrabajosContenido />
