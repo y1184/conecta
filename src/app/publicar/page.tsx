@@ -229,7 +229,7 @@ export default function Publicar() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Presupuesto (opcional)</label>
               <input
@@ -242,7 +242,7 @@ export default function Publicar() {
             </div>
             
             {/* 👈 NUEVO: Fila con País y Ubicación */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">País</label>
                 <select
