@@ -9,35 +9,41 @@ import {
   calcularCategoria,
 } from "./valores";
 
-type Tarea = {
-  id: string;
-  texto: string;
-};
-
-const TAREAS: Tarea[] = [
-  { id: "rut", texto: "Obtuve mi RUT en DGI" },
-  { id: "regimen", texto: "Elegí mi régimen (Monotributo / General)" },
-  { id: "bps", texto: "Me dí de alta en BPS" },
-  { id: "factura", texto: "Configuré facturación electrónica" },
-  { id: "primera", texto: "Emití mi primera factura" },
-];
-
 export default function Formalizate() {
+  const [pais, setPais] = useState<"Uruguay" | "Argentina">("Uruguay"); // 👈 NUEVO
   const [tareasHechas, setTareasHechas] = useState<string[]>([]);
   const [cargado, setCargado] = useState(false);
   const [facturacion, setFacturacion] = useState("");
 
+  // Definimos las tareas según el país
+  const TAREAS = pais === "Uruguay" ? [
+    { id: "rut", texto: "Obtuve mi RUT en DGI" },
+    { id: "regimen", texto: "Elegí mi régimen (Monotributo / General)" },
+    { id: "bps", texto: "Me dí de alta en BPS" },
+    { id: "factura", texto: "Configuré facturación electrónica" },
+    { id: "primera", texto: "Emití mi primera factura" },
+  ] : [
+    { id: "cuit", texto: "Obtuve mi CUIT en ARCA (ex AFIP)" },
+    { id: "clave", texto: "Generé mi Clave Fiscal" },
+    { id: "monotributo", texto: "Me inscribí en el Monotributo" },
+    { id: "obra_social", texto: "Elegí mi Obra Social" },
+    { id: "factura", texto: "Configuré facturación electrónica" },
+  ];
+
   useEffect(() => {
-    const guardado = localStorage.getItem("formalizate_progreso");
+    // Cargamos el progreso del país seleccionado
+    const guardado = localStorage.getItem(`formalizate_progreso_${pais}`);
     if (guardado) {
       try {
         setTareasHechas(JSON.parse(guardado));
       } catch {
         setTareasHechas([]);
       }
+    } else {
+      setTareasHechas([]);
     }
     setCargado(true);
-  }, []);
+  }, [pais]);
 
   const toggleTarea = (id: string) => {
     const nuevas = tareasHechas.includes(id)
@@ -45,7 +51,7 @@ export default function Formalizate() {
       : [...tareasHechas, id];
 
     setTareasHechas(nuevas);
-    localStorage.setItem("formalizate_progreso", JSON.stringify(nuevas));
+    localStorage.setItem(`formalizate_progreso_${pais}`, JSON.stringify(nuevas));
   };
 
   const categoriaCalculada = () => {
@@ -55,12 +61,11 @@ export default function Formalizate() {
   };
 
   const catInfo = categoriaCalculada();
-
   const progreso = Math.round((tareasHechas.length / TAREAS.length) * 100);
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-200">
+    <div className="min-h-screen bg-slate-50">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <Link href="/" className="text-2xl font-bold text-sky-600">
             Conecta
@@ -69,189 +74,130 @@ export default function Formalizate() {
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-12">
+        
+        {/* 👈 NUEVO: SELECTOR DE PAÍS */}
+        <div className="flex justify-center mb-10">
+          <div className="bg-white p-1.5 rounded-full border border-slate-200 shadow-sm inline-flex gap-2">
+            <button
+              onClick={() => setPais("Uruguay")}
+              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-colors ${pais === "Uruguay" ? 'bg-sky-100 text-sky-700' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              🇺🇾 Soy de Uruguay
+            </button>
+            <button
+              onClick={() => setPais("Argentina")}
+              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-colors ${pais === "Argentina" ? 'bg-sky-100 text-sky-700' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              🇦🇷 Soy de Argentina
+            </button>
+          </div>
+        </div>
+
         {/* HERO */}
         <section className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">
-            Formalizate como unipersonal
+          <h1 className="text-4xl font-bold mb-4 text-slate-800">
+            Formalizate como unipersonal en {pais}
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
             Si trabajás por tu cuenta, formalizarte te da respaldo legal,
             aportes jubilatorios y obra social. Acá te contamos los pasos.
           </p>
         </section>
 
         {/* QUE ES */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-4">¿Qué es ser unipersonal?</h2>
-          <p className="text-gray-700 mb-3">
+        <section className="mb-10 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+          <h2 className="text-2xl font-bold mb-4 text-slate-800">¿Qué es ser unipersonal?</h2>
+          <p className="text-slate-700 mb-3">
             Unipersonal es la forma más simple de trabajar por tu cuenta de
             manera formal. No necesitás socios, ni escribir una sociedad
             anónima, ni contratar a nadie. Vos sola/o trabajás, emitís
             facturas y aportás al sistema.
           </p>
-          <p className="text-gray-700">
+          <p className="text-slate-700">
             Es ideal para electricistas, plomeros, diseñadores, programadores,
             limpiadores, docentes particulares y cualquier persona que brinde
             un servicio de forma independiente.
           </p>
         </section>
 
-        {/* PASOS */}
+        {/* PASOS ADAPTADOS AL PAÍS */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-6">
-            Los 5 pasos para formalizarte
+          <h2 className="text-2xl font-bold mb-6 text-slate-800">
+            Los pasos para formalizarte en {pais}
           </h2>
 
-          <div className="mb-8 border-l-4 border-blue-600 pl-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-sky-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                1
+          {pais === "Uruguay" ? (
+            // --- GUÍA URUGUAY ---
+            <div className="space-y-6">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-sky-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-sky-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
+                  <h3 className="text-xl font-bold text-slate-800">Alta en DGI (RUT)</h3>
+                </div>
+                <p className="text-slate-700 mb-3">Lo primero es obtener tu <strong>RUT</strong> en la Dirección General Impositiva. Podés hacerlo 100% online.</p>
+                <a href="https://www.gub.uy/direccion-general-impositiva/" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline font-medium">→ Ir al sitio de DGI</a>
               </div>
-              <h3 className="text-xl font-bold">Alta en DGI (RUT)</h3>
-            </div>
-            <p className="text-gray-700 mb-3">
-              Lo primero es obtener tu <strong>RUT</strong> (Registro Único
-              Tributario) en la Dirección General Impositiva.
-            </p>
-            <p className="text-gray-700 mb-3">
-              Podés hacerlo <strong>100% online</strong> desde el sitio de DGI,
-              con tu cédula de identidad y una contraseña que generás vos misma.
-            </p>
-            <a
-              href="https://www.gub.uy/direccion-general-impositiva/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sky-600 hover:underline font-medium"
-            >
-              → Ir al sitio de DGI
-            </a>
-          </div>
-
-          <div className="mb-8 border-l-4 border-blue-600 pl-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-sky-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                2
-              </div>
-              <h3 className="text-xl font-bold">
-                Elegir Monotributo o Régimen General
-              </h3>
-            </div>
-            <p className="text-gray-700 mb-4">
-              Hay dos formas de tributar. La mayoría de los trabajadores
-              independientes eligen <strong>Monotributo</strong> por ser más
-              simple.
-            </p>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="border border-blue-200 bg-blue-50 rounded-xl p-4">
-                <p className="font-bold text-blue-800 mb-2">✅ Monotributo</p>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  <li>• Un solo pago mensual</li>
-                  <li>• Incluye IVA, IRPF y otros tributos</li>
-                  <li>• Facturación hasta cierto tope</li>
-                  <li>• Ideal si estás empezando</li>
-                </ul>
+              
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-sky-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-sky-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
+                  <h3 className="text-xl font-bold text-slate-800">Monotributo o Régimen General</h3>
+                </div>
+                <p className="text-slate-700">La mayoría elige <strong>Monotributo</strong> (un solo pago mensual). Si facturás mucho, necesitás Régimen General.</p>
               </div>
 
-              <div className="border border-gray-200 bg-gray-50 rounded-xl p-4">
-                <p className="font-bold text-gray-800 mb-2">
-                  📋 Régimen General
-                </p>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  <li>• Múltiples impuestos por separado</li>
-                  <li>• IVA + IRPF + otros</li>
-                  <li>• Facturación sin tope</li>
-                  <li>• Requiere contador</li>
-                </ul>
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-sky-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-sky-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
+                  <h3 className="text-xl font-bold text-slate-800">Alta en BPS</h3>
+                </div>
+                <p className="text-slate-700 mb-3">El Banco de Previsión Social te da aporte jubilatorio y obra social. Si tenés menos de 30 años, hay descuentos.</p>
+                <a href="https://www.bps.gub.uy/" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline font-medium">→ Ir al sitio de BPS</a>
               </div>
             </div>
-          </div>
+          ) : (
+            // --- GUÍA ARGENTINA ---
+            <div className="space-y-6">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-sky-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-sky-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
+                  <h3 className="text-xl font-bold text-slate-800">Obtener el CUIT en ARCA</h3>
+                </div>
+                <p className="text-slate-700 mb-3">Antes llamado AFIP. Es el registro único donde vas a declarar tu actividad. Podés iniciarlo online con tu Clave Fiscal.</p>
+                <a href="https://www.afip.gob.ar/" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline font-medium">→ Ir al sitio de ARCA</a>
+              </div>
+              
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-sky-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-sky-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
+                  <h3 className="text-xl font-bold text-slate-800">Inscribirse en el Monotributo</h3>
+                </div>
+                <p className="text-slate-700">En Argentina, el Monotributo unifica impuestos y jubilación en una sola cuota mensual. Es ideal para empezar.</p>
+              </div>
 
-          <div className="mb-8 border-l-4 border-blue-600 pl-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-sky-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                3
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-sky-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-sky-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
+                  <h3 className="text-xl font-bold text-slate-800">Elegir Obra Social</h3>
+                </div>
+                <p className="text-slate-700">Al inscribirte en el Monotributo, podés elegir una Obra Social para vos y tu familia.</p>
               </div>
-              <h3 className="text-xl font-bold">Alta en BPS</h3>
             </div>
-            <p className="text-gray-700 mb-3">
-              El Banco de Previsión Social es el que te da:
-            </p>
-            <ul className="text-gray-700 space-y-1 mb-3">
-              <li>• <strong>Aporte jubilatorio</strong> (tu futuro)</li>
-              <li>• <strong>Obra social</strong> (para vos y tu familia)</li>
-              <li>• <strong>Cobertura por enfermedad</strong></li>
-            </ul>
-            <p className="text-gray-700 mb-3">
-              Si tenés menos de 30 años, tenés{" "}
-              <strong>descuentos importantes</strong> los primeros años.
-            </p>
-            <a
-              href="https://www.bps.gub.uy/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sky-600 hover:underline font-medium"
-            >
-              → Ir al sitio de BPS
-            </a>
-          </div>
-
-          <div className="mb-8 border-l-4 border-blue-600 pl-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-sky-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                4
-              </div>
-              <h3 className="text-xl font-bold">Facturación electrónica</h3>
-            </div>
-            <p className="text-gray-700 mb-3">
-              Cuando cobrás por un servicio, tenés que emitir una factura
-              electrónica. Hay varias formas:
-            </p>
-            <ul className="text-gray-700 space-y-1 mb-3">
-              <li>• <strong>Facturas gratuitas de DGI</strong> (hasta cierto tope)</li>
-              <li>• <strong>Sistemas pagos</strong> (más cómodos, mensuales)</li>
-              <li>• <strong>Contador</strong> que te las emite</li>
-            </ul>
-            <p className="text-gray-700">
-              Para empezar, las gratuitas de DGI alcanzan perfecto.
-            </p>
-          </div>
-
-          <div className="mb-8 border-l-4 border-blue-600 pl-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-sky-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                5
-              </div>
-              <h3 className="text-xl font-bold">Empezar a facturar</h3>
-            </div>
-            <p className="text-gray-700">
-              Listo. Ya podés trabajar formalmente, emitir facturas, aportar a
-              tu jubilación y tener obra social. Cada mes vas a pagar tu
-              Monotributo y tu BPS según tu categoría.
-            </p>
-          </div>
+          )}
         </section>
 
-        {/* CHECKLIST */}
-        <section className="mb-10 bg-blue-50 border border-blue-200 rounded-2xl p-6">
-          <h2 className="text-2xl font-bold mb-2">Mi progreso</h2>
-          <p className="text-gray-600 mb-6 text-sm">
-            Marcá cada paso a medida que lo vas completando. Se guarda
-            automáticamente en tu navegador.
-          </p>
+        {/* CHECKLIST ADAPTADO */}
+        <section className="mb-10 bg-white border border-slate-200 shadow-sm rounded-3xl p-6">
+          <h2 className="text-2xl font-bold mb-2 text-slate-800">Mi progreso en {pais}</h2>
+          <p className="text-slate-500 mb-6 text-sm">Marcá cada paso a medida que lo vas completando.</p>
 
           <div className="mb-6">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>
-                Progreso: {tareasHechas.length} de {TAREAS.length}
-              </span>
-              <span className="font-medium">{progreso}%</span>
+            <div className="flex justify-between text-sm text-slate-600 mb-2 font-medium">
+              <span>Progreso: {tareasHechas.length} de {TAREAS.length}</span>
+              <span className="text-sky-600">{progreso}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div
-                className="bg-sky-600 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${progreso}%` }}
-              ></div>
+            <div className="w-full bg-slate-100 rounded-full h-3">
+              <div className="bg-sky-500 h-3 rounded-full transition-all duration-300" style={{ width: `${progreso}%` }}></div>
             </div>
           </div>
 
@@ -262,26 +208,12 @@ export default function Formalizate() {
                 <button
                   key={tarea.id}
                   onClick={() => toggleTarea(tarea.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition ${
-                    hecha
-                      ? "bg-green-50 border border-green-200"
-                      : "bg-white border border-gray-200 hover:border-blue-300"
-                  }`}
+                  className={`w-full flex items-center gap-3 p-4 rounded-xl text-left transition border ${hecha ? "bg-green-50 border-green-200" : "bg-slate-50 border-slate-200 hover:border-sky-300"}`}
                 >
-                  <div
-                    className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 ${
-                      hecha
-                        ? "bg-green-500 border-green-500 text-white"
-                        : "border-gray-300"
-                    }`}
-                  >
+                  <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${hecha ? "bg-green-500 border-green-500 text-white" : "border-slate-300 bg-white"}`}>
                     {hecha && "✓"}
                   </div>
-                  <span
-                    className={
-                      hecha ? "text-green-800 line-through" : "text-gray-700"
-                    }
-                  >
+                  <span className={hecha ? "text-green-800 line-through font-medium" : "text-slate-700 font-medium"}>
                     {tarea.texto}
                   </span>
                 </button>
@@ -290,249 +222,102 @@ export default function Formalizate() {
           </div>
 
           {progreso === 100 && (
-            <div className="mt-6 bg-green-100 border border-green-300 rounded-lg p-4 text-center">
-              <p className="text-green-800 font-medium">
-                🎉 ¡Felicitaciones! Completaste todos los pasos.
-              </p>
-              <p className="text-sm text-green-700 mt-1">
-                Ya sos unipersonal formalizado.
-              </p>
+            <div className="mt-6 bg-green-100 border border-green-300 rounded-xl p-4 text-center">
+              <p className="text-green-800 font-bold text-lg">🎉 ¡Felicitaciones!</p>
+              <p className="text-sm text-green-700 mt-1">Completaste todos los pasos para formalizarte en {pais}.</p>
             </div>
           )}
         </section>
 
-        {/* CALCULADORA */}
-        <section className="mb-10 bg-green-50 border border-green-200 rounded-2xl p-6">
-          <h2 className="text-2xl font-bold mb-2">
-            🧮 Calculadora de aportes
-          </h2>
-          <p className="text-gray-600 mb-6 text-sm">
-            Ingresá cuánto pensás facturar por mes y te calculamos
-            aproximadamente qué categoría te corresponde y cuánto pagarías.
-          </p>
+        {/* CALCULADORA (Solo Uruguay por ahora) */}
+        {pais === "Uruguay" && (
+          <section className="mb-10 bg-green-50 border border-green-200 shadow-sm rounded-3xl p-6">
+            <h2 className="text-2xl font-bold mb-2 text-green-900">🧮 Calculadora de aportes (Uruguay)</h2>
+            <p className="text-green-800 mb-6 text-sm">Ingresá cuánto pensás facturar por mes y te calculamos qué categoría te corresponde.</p>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Facturación mensual estimada (en pesos uruguayos)
-            </label>
-            <input
-              type="text"
-              value={facturacion}
-              onChange={(e) => setFacturacion(e.target.value)}
-              placeholder="Ej: 30000"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-green-600 bg-white"
-            />
-          </div>
-
-          {catInfo ? (
-            <div className="bg-white rounded-xl border border-green-200 p-5 space-y-3">
-              <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                <span className="text-gray-700">
-                  Categoría de Monotributo:
-                </span>
-                <span className="font-bold text-lg text-green-700">
-                  {catInfo.categoria}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-gray-700">Monotributo:</span>
-                <span className="font-medium">
-                  $ {catInfo.montoMensual.toLocaleString("es-UY")}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-gray-700">BPS (aprox):</span>
-                <span className="font-medium">
-                  $ {BPS_MENSUAL_APROX.toLocaleString("es-UY")}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center border-t border-gray-100 pt-3">
-                <span className="font-bold text-gray-900">Total mensual:</span>
-                <span className="font-bold text-xl text-green-700">
-                  ${" "}
-                  {(
-                    catInfo.montoMensual + BPS_MENSUAL_APROX
-                  ).toLocaleString("es-UY")}
-                </span>
-              </div>
+            <div className="mb-4">
+              <input
+                type="text"
+                value={facturacion}
+                onChange={(e) => setFacturacion(e.target.value)}
+                placeholder="Facturación mensual en pesos uruguayos (ej: 30000)"
+                className="w-full border border-green-300 rounded-xl px-4 py-3 outline-none focus:border-green-600 bg-white"
+              />
             </div>
-          ) : facturacion ? (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-              <p className="text-sm text-yellow-800">
-                Si facturás eso por mes, superás el tope de Monotributo.
-                Deberías consultar por el <strong>Régimen General</strong>.
-              </p>
-            </div>
-          ) : null}
 
-          <p className="text-xs text-gray-500 mt-4 italic">
-            ⚠️ Valores aproximados. Última actualización:{" "}
-            {ULTIMA_ACTUALIZACION}. Verificá los valores reales en{" "}
-            <a
-              href="https://www.gub.uy/direccion-general-impositiva/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sky-600 hover:underline"
-            >
-              DGI
-            </a>{" "}
-            y{" "}
-            <a
-              href="https://www.bps.gub.uy/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sky-600 hover:underline"
-            >
-              BPS
-            </a>
-            .
-          </p>
-        </section>
+            {catInfo ? (
+              <div className="bg-white rounded-xl border border-green-200 p-5 space-y-3">
+                <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                  <span className="text-slate-700">Categoría de Monotributo:</span>
+                  <span className="font-bold text-lg text-green-700">{catInfo.categoria}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-700">Monotributo:</span>
+                  <span className="font-medium">$ {catInfo.montoMensual.toLocaleString("es-UY")}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-700">BPS (aprox):</span>
+                  <span className="font-medium">$ {BPS_MENSUAL_APROX.toLocaleString("es-UY")}</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-slate-100 pt-3">
+                  <span className="font-bold text-slate-900">Total mensual:</span>
+                  <span className="font-bold text-xl text-green-700">$ {(catInfo.montoMensual + BPS_MENSUAL_APROX).toLocaleString("es-UY")}</span>
+                </div>
+              </div>
+            ) : facturacion ? (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                <p className="text-sm text-yellow-800">Si facturás eso, superás el tope de Monotributo. Consultá por el <strong>Régimen General</strong>.</p>
+              </div>
+            ) : null}
+            <p className="text-xs text-slate-500 mt-4 italic">⚠️ Valores aproximados. Última actualización: {ULTIMA_ACTUALIZACION}.</p>
+          </section>
+        )}
 
         {/* PLANTILLAS */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-4">Plantillas descargables</h2>
-          <p className="text-gray-700 mb-5">
-            Modelos listos para adaptar a tu trabajo. Descargalos, editálos
-            y usálos cuando los necesites.
-          </p>
+        <section className="mb-10 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+          <h2 className="text-2xl font-bold mb-4 text-slate-800">Plantillas descargables</h2>
+          <p className="text-slate-600 mb-5">Modelos listos para adaptar a tu trabajo.</p>
 
           <div className="grid md:grid-cols-3 gap-4">
-            <a
-              href="/plantillas/modelo-factura.txt"
-              download
-              className="border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-blue-300 transition text-center"
-            >
+            <a href="/plantillas/modelo-factura.txt" download className="border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-sky-300 transition text-center bg-slate-50">
               <div className="text-3xl mb-3">📄</div>
-              <p className="font-medium mb-1">Modelo de factura</p>
-              <p className="text-xs text-gray-500">Descargar</p>
+              <p className="font-medium text-slate-800 mb-1">Modelo de factura</p>
+              <p className="text-xs text-slate-500">Descargar</p>
             </a>
-
-            <a
-              href="/plantillas/contrato-servicios.txt"
-              download
-              className="border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-blue-300 transition text-center"
-            >
+            <a href="/plantillas/contrato-servicios.txt" download className="border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-sky-300 transition text-center bg-slate-50">
               <div className="text-3xl mb-3">📝</div>
-              <p className="font-medium mb-1">Contrato de servicios</p>
-              <p className="text-xs text-gray-500">Descargar</p>
+              <p className="font-medium text-slate-800 mb-1">Contrato de servicios</p>
+              <p className="text-xs text-slate-500">Descargar</p>
             </a>
-
-            <a
-              href="/plantillas/recibo-pago.txt"
-              download
-              className="border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-blue-300 transition text-center"
-            >
+            <a href="/plantillas/recibo-pago.txt" download className="border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-sky-300 transition text-center bg-slate-50">
               <div className="text-3xl mb-3">💰</div>
-              <p className="font-medium mb-1">Recibo de pago</p>
-              <p className="text-xs text-gray-500">Descargar</p>
+              <p className="font-medium text-slate-800 mb-1">Recibo de pago</p>
+              <p className="text-xs text-slate-500">Descargar</p>
             </a>
           </div>
-        </section>
-
-        {/* CUANTO SE PAGA */}
-        <section className="mb-10 bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-3">
-            💰 ¿Cuánto se paga por mes?
-          </h2>
-          <p className="text-gray-700 mb-3">
-            El monto depende de tu <strong>categoría de Monotributo</strong>{" "}
-            (que se calcula según lo que facturás por año) y del{" "}
-            <strong>BPS</strong>.
-          </p>
-          <p className="text-gray-700 mb-3">
-            <strong>Ojo:</strong> los montos cambian todos los años. Antes de
-            tomar decisiones, verificá los valores actuales en los sitios de
-            DGI y BPS.
-          </p>
-          <p className="text-sm text-gray-600 italic">
-            💡 Tip: si estás empezando y facturás poco, la categoría más baja
-            suele ser muy accesible.
-          </p>
         </section>
 
         {/* CONSEJOS */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-4">Consejos prácticos</h2>
-          <ul className="space-y-3 text-gray-700">
-            <li>
-              ✅ <strong>Asesorate con un contador.</strong> Aunque sea una
-              consulta puntual, te va a ahorrar errores y plata.
-            </li>
-            <li>
-              ✅ <strong>Llevá registro de tus facturas.</strong> Un Excel o un
-              cuaderno alcanza al principio.
-            </li>
-            <li>
-              ✅ <strong>Guardá plata para los aportes.</strong> Cada mes vas a
-              tener que pagar Monotributo + BPS.
-            </li>
-            <li>
-              ✅ <strong>Podés deducir gastos.</strong> Si comprás herramientas,
-              materiales o servicios necesarios, algunos se pueden deducir.
-            </li>
-            <li>
-              ✅ <strong>Si dejás de facturar, podés dar de baja</strong> o
-              cambiar de categoría.
-            </li>
+        <section className="mb-10 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+          <h2 className="text-2xl font-bold mb-4 text-slate-800">Consejos prácticos</h2>
+          <ul className="space-y-3 text-slate-700">
+            <li>✅ <strong>Asesorate con un contador.</strong> Te va a ahorrar errores y plata.</li>
+            <li>✅ <strong>Llevá registro de tus facturas.</strong> Un Excel alcanza al principio.</li>
+            <li>✅ <strong>Guardá plata para los aportes.</strong> Cada mes vas a tener que pagar.</li>
+            <li>✅ <strong>Si dejás de facturar, podés dar de baja</strong> o cambiar de categoría.</li>
           </ul>
         </section>
 
-        {/* LINKS OFICIALES */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-4">Links oficiales útiles</h2>
-          <div className="space-y-2">
-            <a
-              href="https://www.gub.uy/direccion-general-impositiva/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-sky-600 hover:underline"
-            >
-              → DGI (Dirección General Impositiva)
-            </a>
-            <a
-              href="https://www.bps.gub.uy/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-sky-600 hover:underline"
-            >
-              → BPS (Banco de Previsión Social)
-            </a>
-            <a
-              href="https://www.gub.uy/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-sky-600 hover:underline"
-            >
-              → Portal del Estado Uruguayo
-            </a>
-          </div>
-        </section>
-
         {/* CTA */}
-        <section className="bg-sky-600 text-white rounded-3xl p-8 text-center">
+        <section className="bg-sky-600 text-white rounded-3xl p-8 text-center shadow-lg shadow-sky-200">
           <h3 className="text-2xl font-bold mb-3">¿Ya estás formalizado?</h3>
-          <p className="mb-5 opacity-90">
-            Actualizá tu perfil en Conecta y mostrá que trabajás de forma
-            legal. Da más confianza a tus clientes.
-          </p>
-          <Link
-            href="/perfil/editar"
-            className="inline-block bg-white text-sky-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-100"
-          >
+          <p className="mb-5 opacity-90">Actualizá tu perfil en Conecta y mostrá que trabajás de forma legal. Da más confianza a tus clientes.</p>
+          <Link href="/perfil/editar" className="inline-block bg-white text-sky-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 transition-colors shadow-sm">
             Editar mi perfil
           </Link>
         </section>
 
-        <Link
-          href="/"
-          className="inline-block mt-8 text-sky-600 hover:underline"
-        >
-          ← Volver al inicio
-        </Link>
+        <Link href="/" className="inline-block mt-8 text-sky-600 hover:underline font-medium">← Volver al inicio</Link>
       </main>
     </div>
   );
