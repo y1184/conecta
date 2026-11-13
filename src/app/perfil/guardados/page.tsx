@@ -107,7 +107,7 @@ export default function MisGuardados() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
+      <main className="max-w-6xl mx-auto px-6 py-12 w-full">
         <h1 className="text-4xl font-bold mb-2 text-slate-800">Mis guardados</h1>
         <p className="text-slate-600 mb-8">
           Estos son los trabajadores que guardaste para contactar más adelante.
