@@ -183,7 +183,7 @@ function TrabajosContenido() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
+      <main className="max-w-6xl mx-auto px-4 py-8 w-full">
         <h1 className="text-4xl font-bold mb-2 text-slate-800">Trabajos disponibles</h1>
         <p className="text-slate-600 mb-8">
           Estas son las demandas publicadas por empleadores.
