@@ -1,0 +1,19 @@
+MODELO DE FACTURA
+
+Fecha: [Fecha]
+Número de factura: [Número]
+
+Datos del emisor:
+Nombre: [Tu nombre completo]
+RUT / CUIT: [Tu número]
+Dirección: [Tu dirección]
+
+Datos del cliente:
+Nombre: [Nombre del cliente]
+Dirección: [Dirección del cliente]
+
+Detalle del servicio:
+Descripción: [Ej: Reparación de cañería en baño]
+Monto total: $ [Monto]
+
+¡Gracias por su compra!

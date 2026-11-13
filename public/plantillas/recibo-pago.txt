@@ -1,0 +1,10 @@
+RECIBO DE PAGO
+
+Recibí de [Nombre del cliente] la suma de $ [Monto] en concepto de [Descripción del trabajo].
+
+Fecha: [Fecha]
+Forma de pago: [Efectivo / Transferencia]
+
+Firma: ______________________
+[Tu nombre completo]
+RUT / CUIT: [Tu número]

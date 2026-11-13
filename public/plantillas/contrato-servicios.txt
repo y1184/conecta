@@ -1,0 +1,11 @@
+CONTRATO DE PRESTACIÓN DE SERVICIOS
+
+Entre [Tu nombre], en calidad de prestador de servicios, y [Nombre del cliente], en calidad de contratante, se acuerda lo siguiente:
+
+1. OBJETO: El prestador realizará el siguiente servicio: [Descripción del trabajo].
+2. PLAZO: El servicio se realizará en [X] días a partir de la firma.
+3. PRECIO: El monto acordado es de $ [Monto], que se abonará de la siguiente forma: [Forma de pago].
+4. OBLIGACIONES: El prestador se compromete a realizar el trabajo con calidad y el contratante a facilitar el acceso al lugar.
+
+Firma del prestador: ______________________
+Firma del contratante: ______________________
