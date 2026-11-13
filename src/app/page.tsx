@@ -9,8 +9,8 @@ import { User } from "@supabase/supabase-js";
 export default function Home() {
   const [usuario, setUsuario] = useState<User | null>(null);
   const [noLeidos, setNoLeidos] = useState(0);
+  const [menuAbierto, setMenuAbierto] = useState(false); // 👈 NUEVO: Estado para el menú móvil
   
-  // Estados para el buscador
   const [busqueda, setBusqueda] = useState("");
   const [ubicacion, setUbicacion] = useState("");
   
@@ -73,10 +73,12 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       {/* HEADER */}
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between relative">
           <Link href="/" className="text-2xl font-bold text-sky-600">
             Conecta
           </Link>
+
+          {/* 👈 MENÚ DE ESCRITORIO (Oculto en celular) */}
           <nav className="hidden md:flex gap-6 text-sm font-medium text-slate-600">
             <Link href="/trabajos" className="hover:text-sky-600 transition-colors">Buscar trabajo</Link>
             <Link href="/trabajadores" className="hover:text-sky-600 transition-colors">Buscar trabajadores</Link>
@@ -91,39 +93,85 @@ export default function Home() {
               )}
             </Link>
           </nav>
+
+          {/* 👈 BOTÓN DE USUARIO Y HAMBURGUESA */}
           <div className="flex gap-3 items-center">
             {usuario ? (
               <>
-                <Link href="/perfil" className="text-sm font-medium text-slate-600 hover:text-sky-600 transition-colors">
+                <Link href="/perfil" className="hidden sm:block text-sm font-medium text-slate-600 hover:text-sky-600 transition-colors">
                   Mi cuenta
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="bg-sky-600 text-white text-sm font-medium px-5 py-2 rounded-full hover:bg-sky-700 transition-colors shadow-sm"
+                  className="hidden sm:block bg-sky-600 text-white text-sm font-medium px-5 py-2 rounded-full hover:bg-sky-700 transition-colors shadow-sm"
                 >
                   Salir
                 </button>
               </>
             ) : (
               <>
-                <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-sky-600 transition-colors">
+                <Link href="/login" className="hidden sm:block text-sm font-medium text-slate-600 hover:text-sky-600 transition-colors">
                   Ingresar
                 </Link>
-                <Link href="/registro" className="bg-sky-600 text-white text-sm font-medium px-5 py-2 rounded-full hover:bg-sky-700 transition-colors shadow-sm">
+                <Link href="/registro" className="hidden sm:block bg-sky-600 text-white text-sm font-medium px-5 py-2 rounded-full hover:bg-sky-700 transition-colors shadow-sm">
                   Registrarse
                 </Link>
               </>
             )}
+
+            {/* 👈 NUEVO: Botón Hamburguesa (solo visible en móvil) */}
+            <button
+              onClick={() => setMenuAbierto(!menuAbierto)}
+              className="md:hidden p-2 text-slate-600 hover:text-sky-600 focus:outline-none"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                {menuAbierto ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
+
+          {/* 👈 NUEVO: MENÚ DESPLEGABLE MÓVIL */}
+          {menuAbierto && (
+            <div className="absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-lg md:hidden flex flex-col py-4 px-6 gap-4">
+              <Link href="/trabajos" onClick={() => setMenuAbierto(false)} className="text-sm font-medium text-slate-600 hover:text-sky-600">Buscar trabajo</Link>
+              <Link href="/trabajadores" onClick={() => setMenuAbierto(false)} className="text-sm font-medium text-slate-600 hover:text-sky-600">Buscar trabajadores</Link>
+              <Link href="/formalizate" onClick={() => setMenuAbierto(false)} className="text-sm font-medium text-slate-600 hover:text-sky-600">Formalizate</Link>
+              <Link href="/publicar" onClick={() => setMenuAbierto(false)} className="text-sm font-medium text-slate-600 hover:text-sky-600">Publicar demanda</Link>
+              <Link href="/mensajes" onClick={() => setMenuAbierto(false)} className="text-sm font-medium text-slate-600 hover:text-sky-600 flex items-center">
+                Mensajes
+                {noLeidos > 0 && (
+                  <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{noLeidos}</span>
+                )}
+              </Link>
+              
+              <div className="h-px bg-gray-200 w-full my-1"></div>
+
+              {usuario ? (
+                <>
+                  <Link href="/perfil" onClick={() => setMenuAbierto(false)} className="text-sm font-medium text-sky-600">Mi cuenta</Link>
+                  <button onClick={() => { handleLogout(); setMenuAbierto(false); }} className="text-left text-sm font-medium text-red-600">Cerrar sesión</button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setMenuAbierto(false)} className="text-sm font-medium text-sky-600">Ingresar</Link>
+                  <Link href="/registro" onClick={() => setMenuAbierto(false)} className="text-sm font-medium text-sky-600">Registrarse</Link>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
       {/* HERO */}
       <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center flex-1 w-full">
-        <h2 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight text-slate-800">
+        <h2 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight text-slate-800">
           Conectamos <span className="text-sky-600">Trabajadores</span> con <span className="text-sky-600">Empleos</span>
         </h2>
-        <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
           Publicá lo que necesitás o lo que ofrecés. Encontramos la persona justa para el trabajo justo.
         </p>
 
@@ -131,7 +179,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto mt-10 px-4 relative z-10">
           <form 
             onSubmit={handleBuscar}
-            className="bg-white rounded-full shadow-2xl shadow-slate-300/50 p-2 flex flex-col md:flex-row items-center gap-2 border border-slate-200"
+            className="bg-white rounded-3xl md:rounded-full shadow-2xl shadow-slate-300/50 p-2 flex flex-col md:flex-row items-center gap-2 border border-slate-200"
           >
             <input
               type="text"
@@ -222,10 +270,10 @@ export default function Home() {
 
       {/* BANNER UNIPERSONAL */}
       <section className="max-w-6xl mx-auto px-6 py-20 w-full">
-        <div className="bg-sky-600 text-white rounded-3xl p-12 text-center shadow-2xl shadow-sky-200 relative overflow-hidden">
+        <div className="bg-sky-600 text-white rounded-3xl p-8 md:p-12 text-center shadow-2xl shadow-sky-200 relative overflow-hidden">
           <div className="relative z-10">
-            <h3 className="text-3xl font-bold mb-4">¿Trabajás por tu cuenta?</h3>
-            <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
+            <h3 className="text-2xl md:text-3xl font-bold mb-4">¿Trabajás por tu cuenta?</h3>
+            <p className="text-base md:text-lg mb-8 opacity-90 max-w-2xl mx-auto">
               Te ayudamos a formalizarte como unipersonal: alta en DGI, BPS, facturación electrónica y todo lo que necesitás.
             </p>
             <Link href="/formalizate" className="inline-block bg-white text-sky-600 px-8 py-3 rounded-full font-bold hover:bg-slate-50 transition-colors shadow-lg">
