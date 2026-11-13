@@ -125,7 +125,7 @@ export default function MisGuardados() {
             </Link>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             {guardados.map((trabajador) => (
               <div
                 key={trabajador.id}
@@ -171,7 +171,7 @@ export default function MisGuardados() {
                   </p>
                 )}
 
-                <div className="space-y-2 mt-4">
+                <div className="space-y-2 mt-4 w-full">
                   <Link
                     href={`/chat/${trabajador.user_id}`}
                     className="block w-full text-center bg-slate-800 text-white font-medium py-2.5 rounded-xl hover:bg-slate-900 transition-colors shadow-sm"
